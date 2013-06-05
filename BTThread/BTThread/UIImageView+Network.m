@@ -143,15 +143,6 @@ static char kBTImageRequestFlagObjectKey = 3;
   return __memoryCache;
 }
 
-//+ (BTCache*)sharedCache {
-//  static BTCache *__memoryCache = nil;
-//  static dispatch_once_t __onceToken;
-//  dispatch_once(&__onceToken, ^{
-//    __memoryCache = [[BTCache alloc] init];
-//  });
-//  return __memoryCache;
-//}
-
 - (void)setImageWithURL:(NSURL *)url {
   if (![self.requestURL isEqual:url]) {
     [[BTCache sharedCache] cancelImageForURL:self.requestURL];
@@ -195,6 +186,7 @@ static char kBTImageRequestFlagObjectKey = 3;
   //[request setHTTPShouldHandleCookies:NO];
   //[request addValue:@"image/*" forHTTPHeaderField:@"Accept"];
   BTURLRequestOperation *operation = [[BTURLRequestOperation alloc] initWithRequest:request delegate:self];
+  operation.urlResponse = [[[BTURLImageResponse alloc] init] autorelease];
   if ([url isFileURL]) { //优先加载本地文件
     //NSLog(@"isFileURL = YES fileReferenceURL=%@ filePathURL=%@", [url fileReferenceURL],[url filePathURL]);
     //TODO: if it's a local file, send to an other queue? we need to load it first.
@@ -240,11 +232,9 @@ static char kBTImageRequestFlagObjectKey = 3;
   
 }
 - (void)requestFinished:(BTURLRequestOperation *)operation {
-  NSInteger length = [operation.responseData length];
-  if (length > 0) {
-    
-    UIImage *image = [UIImage imageWithData:operation.responseData];
-//    self.image = image;
+    BTURLImageResponse *response = operation.urlResponse;
+    UIImage *image = response.image;
+    //    self.image = image;
 //
     
 //    CIContext *context = [CIContext contextWithOptions:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:NO] forKey: kCIContextUseSoftwareRenderer]];
@@ -268,7 +258,6 @@ static char kBTImageRequestFlagObjectKey = 3;
 //    [self setNeedsDisplay];
 //    self.image = [UIImage imageWithCGImage:[image CGImage] scale:[[UIScreen mainScreen] scale] orientation:image.imageOrientation];
     self.isLoaded = YES;
-  }
 }
 - (void)requestFailed:(BTURLRequestOperation *)operation {
   

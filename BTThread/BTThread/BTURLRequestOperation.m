@@ -26,6 +26,9 @@
 // 
 // @discussion By default, data is accumulated into a buffer that is stored into `responseData` upon completion of the request. When `outputStream` is set, the data will not be accumulated into an internal buffer, and as a result, the `responseData` property of the completed request will be `nil`. The output stream will be scheduled in the network thread runloop upon being set.
 // */
+
+
+
 @property (nonatomic, retain) NSURLConnection *connection;
 @property (nonatomic, retain) NSOutputStream *outputStream;
 @property (nonatomic, retain) NSURLRequest *request;
@@ -41,6 +44,10 @@
 @end
 
 @implementation BTURLRequestOperation
+
+
+@synthesize urlResponse = _urlResponse;
+
 
 - (void)dealloc {
   self.request = nil;
@@ -70,6 +77,7 @@
  Subclass should overwrite this method
  */
 - (void)concurrentExecution {
+    NSLog(@"发请求");
   dispatch_async(dispatch_get_main_queue(), ^{
     if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
       [_delegate performSelector:@selector(requestStarted:) withObject:self];
@@ -123,6 +131,11 @@
   self.response = response;
   self.outputStream = [NSOutputStream outputStreamToMemory];
   [self.outputStream open];
+    
+    
+    
+    
+    //这个位置为什么要这么写？难道不会直接跳到fail
   if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
     NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
     if (([httpResponse statusCode]/100) != 2) {
@@ -178,11 +191,25 @@
   
   [self closeConnection];
   [self markOperationFinish];
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
-      [_delegate performSelector:@selector(requestFinished:) withObject:self];
+    
+   NSError *error =  [_urlResponse urlOperation:self successResponse:self.response data:self.responseData];
+    if(error==nil){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
+                [_delegate performSelector:@selector(requestFinished:) withObject:self];
+            }
+        });
+    }else{
+        self.error = error;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
+                [_delegate performSelector:@selector(requestFailed:) withObject:self];
+            }
+        });
     }
-  });
+    
+    
+
 }
 
 - (void)connection:(NSURLConnection __unused *)connection didFailWithError:(NSError *)error {

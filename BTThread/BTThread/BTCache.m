@@ -5,7 +5,7 @@
 //  Created by He baochen on 13-5-17.
 //  Copyright (c) 2013年 He baochen. All rights reserved.
 //
-
+#import "SDWebImageDecoder.h"
 #import "BTCache.h"
 #import "NSStringAdditions.h"
 
@@ -84,7 +84,10 @@ inline static NSString *keyForURL(NSURL *url) {
         BOOL exist = [_defaultManager fileExistsAtPath:[self filePathForKey:key]];
         if (exist) {
           @try {
-            img = [[NSKeyedUnarchiver unarchiveObjectWithFile:[self filePathForKey:key]] retain];
+            
+            UIImage *image = [[NSKeyedUnarchiver unarchiveObjectWithFile:[self filePathForKey:key]] retain];
+            img = [[UIImage decodedImageWithImage:image] retain];
+            [image release];
           } @catch (NSException* e) {
             // Surpress any unarchiving exceptions and continue with nil
           }

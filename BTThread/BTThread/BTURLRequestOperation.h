@@ -7,6 +7,8 @@
 //
 
 #import "BTConcurrentOperation.h"
+#import "BTURLImageResponse.h"
+#import "BTURLResponse.h"
 
 @class BTURLRequestOperation;
 @protocol BTURLRequestDelegate <NSObject>
@@ -19,13 +21,18 @@
 // When a delegate implements this method, it is expected to process all incoming data itself
 // This means that responseData / responseString / downloadDestinationPath etc are ignored
 // You can have the request call a different method by setting didReceiveDataSelector
+
+//TODO: 至于进度应该如何回调。
 - (void)request:(BTURLRequestOperation *)operation didReceiveData:(NSData *)data;
 
 @end
 
 @interface BTURLRequestOperation : BTConcurrentOperation<NSURLConnectionDataDelegate> {
   id<BTURLRequestDelegate> _delegate;
+    
+    //猜测是是否需要对外暴漏进度。。。
   BOOL _receiveDataExternally;
+  id<BTURLResponse>  _urlResponse;
 }
 
 - (id)initWithRequest:(NSURLRequest*)request delegate:(id<BTURLRequestDelegate>)delegate;
@@ -39,7 +46,7 @@
 /**
  The last response received by the operation's connection.
  */
-@property (readonly, nonatomic, retain) NSURLResponse *response;
+//@property (readonly, nonatomic, retain) NSURLResponse *response;
 
 /**
  The error, if any, that occurred in the lifecycle of the request.
@@ -53,7 +60,7 @@
 /**
  The data received during the request.
  */
-@property (readonly, nonatomic, retain) NSData *responseData;
+//@property (readonly, nonatomic, retain) NSData *responseData;
 
 
 ///---------------------------------------------
@@ -64,6 +71,20 @@
  The user info dictionary for the receiver.
  */
 @property (nonatomic, retain) NSDictionary *userInfo;
+
+
+
+///---------------------------------------------
+/// @name Parse and Validate Receive Data
+///---------------------------------------------
+
+/**
+ The object to parse and validate receivedata
+ */
+@property (nonatomic,retain)id<BTURLResponse> urlResponse;
+
+
+
 
 ///------------------------------------------------------
 /// @name Initializing an AFURLConnectionOperation Object
@@ -77,5 +98,11 @@
  @discussion This is the designated initializer.
  */
 - (id)initWithRequest:(NSURLRequest *)urlRequest;
+
+
+
+
+
+
 
 @end

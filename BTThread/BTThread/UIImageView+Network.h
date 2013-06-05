@@ -8,10 +8,20 @@
 
 #import <UIKit/UIKit.h>
 #import "BTURLRequestOperation.h"
+#import "BTURLImageResponse.h"
 
 /**
  TODO: [[UIScreen mainScreen] scale]
  TODO: 在无内存缓存的情况，小图的流畅性要比大图好，需要测试一下到底是IO影响了流畅性，还是大图绘制，将大图在从IO读出转成小图试试
+ */
+
+
+
+/**
+ Neoadd:
+ TODO: 下面2个任选其一
+ 1.相同的图片要么在发请求之前判断本地有没有这个图片，尤其是在队列之中的
+ 2.效仿320中的loader的机制。。
  */
 
 @interface UIImageView (Network) <BTURLRequestDelegate>
