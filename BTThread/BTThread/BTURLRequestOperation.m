@@ -16,14 +16,14 @@
 //
 ///**
 // The input stream used to read data to be sent during the request.
-// 
+//
 // @discussion This property acts as a proxy to the `HTTPBodyStream` property of `request`.
 // */
 //@property (nonatomic, retain) NSInputStream *inputStream;
 //
 ///**
 // The output stream that is used to write data received until the request is finished.
-// 
+//
 // @discussion By default, data is accumulated into a buffer that is stored into `responseData` upon completion of the request. When `outputStream` is set, the data will not be accumulated into an internal buffer, and as a result, the `responseData` property of the completed request will be `nil`. The output stream will be scheduled in the network thread runloop upon being set.
 // */
 
@@ -50,27 +50,27 @@
 
 
 - (void)dealloc {
-  self.request = nil;
-  self.response = nil;
-  self.responseData = nil;
-  [self closeConnection];
-  self.error = nil;
-  [super dealloc];
+    self.request = nil;
+    self.response = nil;
+    self.responseData = nil;
+    [self closeConnection];
+    self.error = nil;
+    [super dealloc];
 }
 
 - (void)closeConnection {
-  [self.outputStream close];
-  self.outputStream = nil;
-  self.connection = nil;
+    [self.outputStream close];
+    self.outputStream = nil;
+    self.connection = nil;
 }
 
 - (id)initWithRequest:(NSURLRequest *)urlRequest delegate:(id<BTURLRequestDelegate>)delegate{
-  self = [super init];
-  if (self) {
-    self.request = urlRequest;
-    _delegate = delegate;
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        self.request = urlRequest;
+        _delegate = delegate;
+    }
+    return self;
 }
 
 /**
@@ -78,42 +78,42 @@
  */
 - (void)concurrentExecution {
     NSLog(@"发请求");
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
-      [_delegate performSelector:@selector(requestStarted:) withObject:self];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
+            [_delegate performSelector:@selector(requestStarted:) withObject:self];
+        }
+    });
+    _connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
+    
+    NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+    for (NSString *runLoopMode in self.runLoopModes) {
+        [self.connection scheduleInRunLoop:runLoop forMode:runLoopMode];
     }
-  });
-  _connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
-  
-  NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
-  for (NSString *runLoopMode in self.runLoopModes) {
-    [self.connection scheduleInRunLoop:runLoop forMode:runLoopMode];
-  }
-  if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
-    _receiveDataExternally = YES;
-  }
-  [self.connection start];
-  //NSLog(@"%@ self.connection start",self);
-
+    if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
+        _receiveDataExternally = YES;
+    }
+    [self.connection start];
+    //NSLog(@"%@ self.connection start",self);
+    
 }
 
 /**
  Subclass should overwrite this method
  */
 - (void)cancelConcurrentExecution {
-  [super cancelConcurrentExecution];
-  NSDictionary *userInfo = nil;
-  if ([self.request URL]) {
-    userInfo = [NSDictionary dictionaryWithObject:[self.request URL] forKey:NSURLErrorFailingURLErrorKey];
-  }
-  NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:userInfo];
-  
-  if (self.connection) {
-    [self.connection cancel];
+    [super cancelConcurrentExecution];
+    NSDictionary *userInfo = nil;
+    if ([self.request URL]) {
+        userInfo = [NSDictionary dictionaryWithObject:[self.request URL] forKey:NSURLErrorFailingURLErrorKey];
+    }
+    NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:userInfo];
     
-    // Manually send this delegate message since `[self.connection cancel]` causes the connection to never send another message to its delegate
-    [self performSelector:@selector(connection:didFailWithError:) withObject:self.connection withObject:error];
-  }
+    if (self.connection) {
+        [self.connection cancel];
+        
+        // Manually send this delegate message since `[self.connection cancel]` causes the connection to never send another message to its delegate
+        [self performSelector:@selector(connection:didFailWithError:) withObject:self.connection withObject:error];
+    }
 }
 
 
@@ -126,73 +126,73 @@
  
  */
 - (void)connection:(NSURLConnection __unused *)connection didReceiveResponse:(NSURLResponse *)response {
-  long long contentLength = [response expectedContentLength];
-  //NSLog(@"didReceiveResponse >> th:%@-op:%@ contentLength:%f",[NSThread currentThread],self.name,(contentLength/1024/1024.0));
-  self.response = response;
-  self.outputStream = [NSOutputStream outputStreamToMemory];
-  [self.outputStream open];
+    long long contentLength = [response expectedContentLength];
+    //NSLog(@"didReceiveResponse >> th:%@-op:%@ contentLength:%f",[NSThread currentThread],self.name,(contentLength/1024/1024.0));
+    self.response = response;
+    self.outputStream = [NSOutputStream outputStreamToMemory];
+    [self.outputStream open];
     
     
     
     
     //这个位置为什么要这么写？难道不会直接跳到fail
-  if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
-    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-    if (([httpResponse statusCode]/100) != 2) {
-      NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:httpResponse.statusCode userInfo:nil];
-      [self performSelector:@selector(connection:didFailWithError:) withObject:connection withObject:error];
-    } 
-  }
-  //      NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
-  //      NSString *modified = [headers objectForKey:@"Last-Modified"];
-  //      if (modified) {
-  //        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-  //
-  //        /* avoid problem if the user's locale is incompatible with HTTP-style dates */
-  //        [dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
-  //
-  //        [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
-  //        self.lastModified = [dateFormatter dateFromString:modified];
-  //        [dateFormatter release];
-  //      }
-  //      else {
-  //        /* default if last modified date doesn't exist (not an error) */
-  //        self.lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:0];
-  //      }
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        if (([httpResponse statusCode]/100) != 2) {
+            NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:httpResponse.statusCode userInfo:nil];
+            [self performSelector:@selector(connection:didFailWithError:) withObject:connection withObject:error];
+        }
+    }
+    //      NSDictionary *headers = [(NSHTTPURLResponse *)response allHeaderFields];
+    //      NSString *modified = [headers objectForKey:@"Last-Modified"];
+    //      if (modified) {
+    //        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    //
+    //        /* avoid problem if the user's locale is incompatible with HTTP-style dates */
+    //        [dateFormatter setLocale:[[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease]];
+    //
+    //        [dateFormatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss zzz"];
+    //        self.lastModified = [dateFormatter dateFromString:modified];
+    //        [dateFormatter release];
+    //      }
+    //      else {
+    //        /* default if last modified date doesn't exist (not an error) */
+    //        self.lastModified = [NSDate dateWithTimeIntervalSinceReferenceDate:0];
+    //      }
 }
 
 - (void)connection:(NSURLConnection __unused *)connection didReceiveData:(NSData *)data {
-  if (_receiveDataExternally) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
-        [_delegate performSelector:@selector(request:didReceiveData:) withObject:self withObject:data];
-      }
-    });
-  } else {
-    if ([self.outputStream hasSpaceAvailable]) {
-      const uint8_t *dataBuffer = (uint8_t *) [data bytes];
-      [self.outputStream write:&dataBuffer[0] maxLength:[data length]];
-      
-      dispatch_async(dispatch_get_main_queue(), ^{
-        //NSLog(@"didReceiveData[%@]:%d",self.name, [data length]);
-        //TODO:
-        //    self.totalBytesRead += [data length];
-        //
-        //    if (self.downloadProgress) {
-        //      self.downloadProgress([data length], self.totalBytesRead, self.response.expectedContentLength);
-        //    }
-      });
+    if (_receiveDataExternally) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
+                [_delegate performSelector:@selector(request:didReceiveData:) withObject:self withObject:data];
+            }
+        });
+    } else {
+        if ([self.outputStream hasSpaceAvailable]) {
+            const uint8_t *dataBuffer = (uint8_t *) [data bytes];
+            [self.outputStream write:&dataBuffer[0] maxLength:[data length]];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                //NSLog(@"didReceiveData[%@]:%d",self.name, [data length]);
+                //TODO:
+                //    self.totalBytesRead += [data length];
+                //
+                //    if (self.downloadProgress) {
+                //      self.downloadProgress([data length], self.totalBytesRead, self.response.expectedContentLength);
+                //    }
+            });
+        }
     }
-  }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection __unused *)connection {
-  self.responseData = [_outputStream propertyForKey:NSStreamDataWrittenToMemoryStreamKey];
-  
-  [self closeConnection];
-  [self markOperationFinish];
+    self.responseData = [_outputStream propertyForKey:NSStreamDataWrittenToMemoryStreamKey];
     
-   NSError *error =  [_urlResponse urlOperation:self successResponse:self.response data:self.responseData];
+    [self closeConnection];
+    [self markOperationFinish];
+    
+    NSError *error =  [_urlResponse urlOperation:self successResponse:self.response data:self.responseData];
     if(error==nil){
         dispatch_async(dispatch_get_main_queue(), ^{
             if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
@@ -209,24 +209,24 @@
     }
     
     
-
+    
 }
 
 - (void)connection:(NSURLConnection __unused *)connection didFailWithError:(NSError *)error {
-  self.error = error;
-
-  [self closeConnection];
-  [self markOperationFinish];
-  dispatch_async(dispatch_get_main_queue(), ^{
-    if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
-      [_delegate performSelector:@selector(requestFailed:) withObject:self];
-    }
-  });
+    self.error = error;
+    
+    [self closeConnection];
+    [self markOperationFinish];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
+            [_delegate performSelector:@selector(requestFailed:) withObject:self];
+        }
+    });
 }
 #pragma mark -
 - (void)setDelegate:(id<BTURLRequestDelegate>)delegate {
-  [_lock lock];
-  _delegate = delegate;
-  [_lock unlock];
+    [_lock lock];
+    _delegate = delegate;
+    [_lock unlock];
 }
 @end

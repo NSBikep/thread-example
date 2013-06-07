@@ -24,7 +24,7 @@
 
 
 - (NSError *)urlOperation:(BTURLRequestOperation *)op successResponse:(NSURLResponse *)response data:(id)data{
-
+    
     
     NSAssert(![NSThread isMainThread], @"必须是子线程");
     NSAssert([data isKindOfClass:[UIImage class]]||[data isKindOfClass:[NSData class]],@"传递的对象必须是NSData，UIImage对象");
@@ -33,8 +33,8 @@
         UIImage *decodeImage = [UIImage decodedImageWithImage:(UIImage *)data];
         self.image =decodeImage;
     }else if ([data isKindOfClass:[NSData class]]){
-//        UIImage *decodeImage = [UIImage decodedImageWithImage:[UIImage imageWithData:data]];
-//        self.image = decodeImage;
+        //        UIImage *decodeImage = [UIImage decodedImageWithImage:[UIImage imageWithData:data]];
+        //        self.image = decodeImage;
         UIImage *image = [UIImage imageWithData:data];
         if(image !=nil){
             UIImage *decodeImage = [UIImage decodedImageWithImage:image];
