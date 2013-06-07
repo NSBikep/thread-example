@@ -24,7 +24,7 @@
  2.效仿320中的loader的机制。。
  */
 
-@interface UIImageView (Network) <BTURLRequestDelegate>
+@interface UIImageView (Network)
 - (void)setImageWithURL:(NSURL *)url;
 - (void)cancelImageRequestOperation;
 - (void)reloadImageRequestIfNeed;

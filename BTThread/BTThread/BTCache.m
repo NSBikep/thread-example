@@ -78,7 +78,7 @@ inline static NSString *keyForURL(NSURL *url) {
     NSOperationQueue *mainQueue = [NSOperationQueue mainQueue];
     BTIOBlockOperation *readExistInDisk = [BTIOBlockOperation blockOperationWithBlock:^{
       NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-      NSLog(@"readExistInDisk.key = %@", key);
+      //NSLog(@"readExistInDisk.key = %@", key);
       img = [[_memoryCache objectForKey:key] retain];
       if (!img) {
         BOOL exist = [_defaultManager fileExistsAtPath:[self filePathForKey:key]];

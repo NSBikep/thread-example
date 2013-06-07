@@ -9,35 +9,48 @@
 #import "BTConcurrentOperation.h"
 #import "BTURLImageResponse.h"
 #import "BTURLResponse.h"
+typedef void(^BTURLRequestOperationCompleteBlock)(BTURLRequestOperation *op);
+typedef void(^BTURLRequestOperationFailedBlock)(BTURLRequestOperation *op);
+typedef void(^BTURLRequestOperationStartBlock)(BTURLRequestOperation *op);
+typedef void(^BTURLRequestOperationCancelBlock)(BTURLRequestOperation *op);
 
-@class BTURLRequestOperation;
-@protocol BTURLRequestDelegate <NSObject>
-
-@optional
-- (void)requestStarted:(BTURLRequestOperation *)operation;
-- (void)requestFinished:(BTURLRequestOperation *)operation;
-- (void)requestFailed:(BTURLRequestOperation *)operation;
-
-// When a delegate implements this method, it is expected to process all incoming data itself
-// This means that responseData / responseString / downloadDestinationPath etc are ignored
-// You can have the request call a different method by setting didReceiveDataSelector
-
-//TODO: 至于进度应该如何回调。
-- (void)request:(BTURLRequestOperation *)operation didReceiveData:(NSData *)data;
-
-@end
+//@class BTURLRequestOperation;
+//@protocol BTURLRequestDelegate <NSObject>
+//
+//@optional
+//- (void)requestStarted:(BTURLRequestOperation *)operation;
+//- (void)requestFinished:(BTURLRequestOperation *)operation;
+//- (void)requestFailed:(BTURLRequestOperation *)operation;
+//
+//// When a delegate implements this method, it is expected to process all incoming data itself
+//// This means that responseData / responseString / downloadDestinationPath etc are ignored
+//// You can have the request call a different method by setting didReceiveDataSelector
+//
+////TODO: 至于进度应该如何回调。
+//- (void)request:(BTURLRequestOperation *)operation didReceiveData:(NSData *)data;
+//
+//@end
 
 @interface BTURLRequestOperation : BTConcurrentOperation<NSURLConnectionDataDelegate> {
-  id<BTURLRequestDelegate> _delegate;
+  //id<BTURLRequestDelegate> _delegate;
     
     //猜测是是否需要对外暴漏进度。。。
   BOOL _receiveDataExternally;
   id<BTURLResponse>  _urlResponse;
 }
 
-- (id)initWithRequest:(NSURLRequest*)request delegate:(id<BTURLRequestDelegate>)delegate;
+//- (id)initWithURL:(NSURL *)requestURL delegate:(id<BTURLRequestDelegate>)delegate;
 
-- (void)setDelegate:(id<BTURLRequestDelegate>)delegate;
+- (id)initWithURL:(NSURL *)requestURL
+            start:(BTURLRequestOperationStartBlock)startBlock
+           cancel:(BTURLRequestOperationCancelBlock)cancelBlock
+         complete:(BTURLRequestOperationCompleteBlock)completeBlock
+          failed:(BTURLRequestOperationFailedBlock)failedBlock;
+
+
+//- (id)initWithRequest:(NSURLRequest*)request delegate:(id<BTURLRequestDelegate>)delegate;
+
+//- (void)setDelegate:(id<BTURLRequestDelegate>)delegate;
 /**
  The request used by the operation's connection.
  */
@@ -97,7 +110,7 @@
  
  @discussion This is the designated initializer.
  */
-- (id)initWithRequest:(NSURLRequest *)urlRequest;
+//- (id)initWithRequest:(NSURLRequest *)urlRequest;
 
 
 

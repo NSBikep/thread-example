@@ -172,10 +172,30 @@ static char kBTImageRequestFlagObjectKey = 3;
     NSURL *url = self.requestURL;
     
     static int testNum = 0;
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
     //[request setHTTPShouldHandleCookies:NO];
     //[request addValue:@"image/*" forHTTPHeaderField:@"Accept"];
-    BTURLRequestOperation *operation = [[BTURLRequestOperation alloc] initWithRequest:request delegate:self];
+    //BTURLRequestOperation *operation = [[BTURLRequestOperation alloc] initWithURL:url delegate:self];
+    
+    BTURLRequestOperationCompleteBlock completeBlock = ^(BTURLRequestOperation *op){
+        BTURLImageResponse *response = op.urlResponse;
+        UIImage *image = response.image;
+        self.image = image;
+        [[BTCache sharedCache] setImage:image forURL:[op.request URL]];        
+        self.alpha = 0.3;
+        [UIView beginAnimations:@"" context:NULL];
+        [UIView setAnimationDuration:0.3];
+        self.alpha = 1.0;
+        
+        [UIView commitAnimations];
+        self.isLoaded = YES;
+    };
+    
+    BTURLRequestOperationStartBlock startBlock = ^(BTURLRequestOperation *op){
+        NSLog(@"开始请求 op =  %@",op);
+    };
+    
+    
+    BTURLRequestOperation *operation = [[BTURLRequestOperation alloc] initWithURL:url start:startBlock cancel:nil complete:completeBlock failed:nil];
     operation.urlResponse = [[[BTURLImageResponse alloc] init] autorelease];
     if ([url isFileURL]) { //优先加载本地文件
         //NSLog(@"isFileURL = YES fileReferenceURL=%@ filePathURL=%@", [url fileReferenceURL],[url filePathURL]);
@@ -199,7 +219,7 @@ static char kBTImageRequestFlagObjectKey = 3;
     BTURLRequestOperation *operation = self.imageRequestOperation;
     if (operation) {
         [operation cancel];
-        [operation setDelegate:nil];
+//        [operation setDelegate:nil];
         self.imageRequestOperation = nil;
     }
 }

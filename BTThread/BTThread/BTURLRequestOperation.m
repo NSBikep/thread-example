@@ -37,6 +37,17 @@
 @property (nonatomic, retain) NSError *error;
 
 
+
+
+
+//Neo add
+
+@property (nonatomic,copy)BTURLRequestOperationCancelBlock   cancelBlock;
+@property (nonatomic,copy)BTURLRequestOperationStartBlock    startBlock;
+@property (nonatomic,copy)BTURLRequestOperationCompleteBlock completeBlock;
+@property (nonatomic,copy)BTURLRequestOperationFailedBlock   faildeBlock;
+
+
 - (void)markOperationFinish;
 - (void)concurrentExecution;
 - (void)cancelConcurrentExecution;
@@ -50,6 +61,10 @@
 
 
 - (void)dealloc {
+    self.completeBlock = nil;
+    self.startBlock = nil;
+    self.cancelBlock = nil;
+    self.faildeBlock = nil;
     self.request = nil;
     self.response = nil;
     self.responseData = nil;
@@ -64,23 +79,43 @@
     self.connection = nil;
 }
 
-- (id)initWithRequest:(NSURLRequest *)urlRequest delegate:(id<BTURLRequestDelegate>)delegate{
+
+- (id)initWithURL:(NSURL *)requestURL
+            start:(BTURLRequestOperationStartBlock)startBlock
+           cancel:(BTURLRequestOperationCancelBlock)cancelBlock
+         complete:(BTURLRequestOperationCompleteBlock)completeBlock
+          failed:(BTURLRequestOperationFailedBlock)failedBlock{
     self = [super init];
-    if (self) {
-        self.request = urlRequest;
-        _delegate = delegate;
+    if(self){
+        self.request = [NSURLRequest requestWithURL:requestURL];
+        _cancelBlock = [cancelBlock copy];
+        _startBlock  = [startBlock copy];
+        _completeBlock = [completeBlock copy];
+        _faildeBlock = [failedBlock copy];
     }
     return self;
 }
 
+
+//- (id)initWithURL:(NSURL *)requestURL delegate:(id<BTURLRequestDelegate>)delegate{
+//    self = [super init];
+//    if(self){
+//        self.request = [NSMutableURLRequest requestWithURL:requestURL];
+//        _delegate = delegate;
+//    }
+//    return self;
+//}
 /**
  Subclass should overwrite this method
  */
 - (void)concurrentExecution {
     NSLog(@"发请求");
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
-            [_delegate performSelector:@selector(requestStarted:) withObject:self];
+//        if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
+//            [_delegate performSelector:@selector(requestStarted:) withObject:self];
+//        }
+        if(self.startBlock){
+            self.startBlock(self);
         }
     });
     _connection = [[NSURLConnection alloc] initWithRequest:self.request delegate:self startImmediately:NO];
@@ -89,9 +124,12 @@
     for (NSString *runLoopMode in self.runLoopModes) {
         [self.connection scheduleInRunLoop:runLoop forMode:runLoopMode];
     }
-    if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
-        _receiveDataExternally = YES;
-    }
+//    if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
+//        _receiveDataExternally = YES;
+//    }
+//TODO: 判断时候需要传递出去进度
+    
+    
     [self.connection start];
     //NSLog(@"%@ self.connection start",self);
     
@@ -164,9 +202,12 @@
 - (void)connection:(NSURLConnection __unused *)connection didReceiveData:(NSData *)data {
     if (_receiveDataExternally) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
-                [_delegate performSelector:@selector(request:didReceiveData:) withObject:self withObject:data];
-            }
+//            if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
+//                [_delegate performSelector:@selector(request:didReceiveData:) withObject:self withObject:data];
+//            }
+//需要计算进度？
+        
+        
         });
     } else {
         if ([self.outputStream hasSpaceAvailable]) {
@@ -193,21 +234,34 @@
     [self markOperationFinish];
     
     NSError *error =  [_urlResponse urlOperation:self successResponse:self.response data:self.responseData];
-    if(error==nil){
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
-                [_delegate performSelector:@selector(requestFinished:) withObject:self];
-            }
-        });
+//    if(error==nil){
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
+//                [_delegate performSelector:@selector(requestFinished:) withObject:self];
+//            }
+//        });
+//    }else{
+//        self.error = error;
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
+//                [_delegate performSelector:@selector(requestFailed:) withObject:self];
+//            }
+//        });
+//    }
+
+    
+    if(error == nil){
+        if(self.completeBlock){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.completeBlock(self);
+            });
+        }
     }else{
         self.error = error;
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
-                [_delegate performSelector:@selector(requestFailed:) withObject:self];
-            }
+            self.faildeBlock(self);
         });
     }
-    
     
     
 }
@@ -218,15 +272,18 @@
     [self closeConnection];
     [self markOperationFinish];
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
-            [_delegate performSelector:@selector(requestFailed:) withObject:self];
+//        if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
+//            [_delegate performSelector:@selector(requestFailed:) withObject:self];
+//        }
+        if(self.faildeBlock){
+            self.faildeBlock(self);
         }
     });
 }
 #pragma mark -
-- (void)setDelegate:(id<BTURLRequestDelegate>)delegate {
-    [_lock lock];
-    _delegate = delegate;
-    [_lock unlock];
-}
+//- (void)setDelegate:(id<BTURLRequestDelegate>)delegate {
+//    [_lock lock];
+//    _delegate = delegate;
+//    [_lock unlock];
+//}
 @end
