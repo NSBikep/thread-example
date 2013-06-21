@@ -202,9 +202,6 @@
 - (void)connection:(NSURLConnection __unused *)connection didReceiveData:(NSData *)data {
     if (_receiveDataExternally) {
         dispatch_async(dispatch_get_main_queue(), ^{
-//            if (_delegate && [_delegate respondsToSelector:@selector(request:didReceiveData:)]) {
-//                [_delegate performSelector:@selector(request:didReceiveData:) withObject:self withObject:data];
-//            }
 //需要计算进度？
         
         
@@ -234,22 +231,6 @@
     [self markOperationFinish];
     
     NSError *error =  [_urlResponse urlOperation:self successResponse:self.response data:self.responseData];
-//    if(error==nil){
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            if (_delegate && [_delegate respondsToSelector:@selector(requestFinished:)]) {
-//                [_delegate performSelector:@selector(requestFinished:) withObject:self];
-//            }
-//        });
-//    }else{
-//        self.error = error;
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
-//                [_delegate performSelector:@selector(requestFailed:) withObject:self];
-//            }
-//        });
-//    }
-
-    
     if(error == nil){
         if(self.completeBlock){
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -272,18 +253,9 @@
     [self closeConnection];
     [self markOperationFinish];
     dispatch_async(dispatch_get_main_queue(), ^{
-//        if (_delegate && [_delegate respondsToSelector:@selector(requestFailed:)]) {
-//            [_delegate performSelector:@selector(requestFailed:) withObject:self];
-//        }
         if(self.faildeBlock){
             self.faildeBlock(self);
         }
     });
 }
-#pragma mark -
-//- (void)setDelegate:(id<BTURLRequestDelegate>)delegate {
-//    [_lock lock];
-//    _delegate = delegate;
-//    [_lock unlock];
-//}
 @end
