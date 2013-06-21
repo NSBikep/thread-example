@@ -128,6 +128,8 @@ static inline BOOL BTStateTransitionIsValid(BTOperationState fromState, BTOperat
 
 #pragma mark - NSOperation
 
+//下面的四个返回BOOL的方法是NSOperation的方法
+
 - (BOOL)isReady {
     return self.state == BTOperationReadyState && [super isReady];
 }

@@ -139,7 +139,7 @@
  Subclass should overwrite this method
  */
 - (void)cancelConcurrentExecution {
-    [super cancelConcurrentExecution];
+    //[super cancelConcurrentExecution];
     NSDictionary *userInfo = nil;
     if ([self.request URL]) {
         userInfo = [NSDictionary dictionaryWithObject:[self.request URL] forKey:NSURLErrorFailingURLErrorKey];
@@ -164,7 +164,7 @@
  
  */
 - (void)connection:(NSURLConnection __unused *)connection didReceiveResponse:(NSURLResponse *)response {
-    long long contentLength = [response expectedContentLength];
+    //long long contentLength = [response expectedContentLength];
     //NSLog(@"didReceiveResponse >> th:%@-op:%@ contentLength:%f",[NSThread currentThread],self.name,(contentLength/1024/1024.0));
     self.response = response;
     self.outputStream = [NSOutputStream outputStreamToMemory];

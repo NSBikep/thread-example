@@ -145,23 +145,27 @@ static char kBTImageRequestFlagObjectKey = 3;
 
 - (void)setImageWithURL:(NSURL *)url {
     if (![self.requestURL isEqual:url]) {
-        [[BTCache sharedCache] cancelImageForURL:self.requestURL];
-        [self cancelImageRequestOperation];
-        self.requestURL = url;
-        
-        self.isLoaded = NO;
-        self.image = nil;
-        [[BTCache sharedCache] imageForURL:url completionBlock:^(UIImage *image, NSURL *url) {
-            if ([self.requestURL isEqual:url]) {
-                if (image) {
-                    self.image = image;
-                } else {
-                    [self sendRequestDalayed];
-                }
+//        [[BTCache sharedCache] cancelImageForURL:self.requestURL];
+//        [self cancelImageRequestOperation];
+//        self.requestURL = url;
+//        
+//        self.isLoaded = NO;
+//        self.image = nil;
+//        [[BTCache sharedCache] imageForURL:url completionBlock:^(UIImage *image, NSURL *url) {
+//            if ([self.requestURL isEqual:url]) {
+//                if (image) {
+//                    self.image = image;
+//                } else {
+//                    [self sendRequestDalayed];
+//                }
+//            }
+//        }];
+        BTImageManger *manger =[BTImageManger imageForURL:self.requestURL completeBlock:^(UIImage *image,NSURL *url){
+            if([self.requestURL isEqual:url]){
+                self.image = image;
             }
         }];
     }
-    
 }
 
 - (void)sendRequestDalayed {
@@ -224,7 +228,6 @@ static char kBTImageRequestFlagObjectKey = 3;
     }
 }
 
-
 - (void)reloadImageRequestIfNeed {
     if (self.isAutoReloadRequest && self.isLoaded == NO) {
         [self sendRequestDalayed];
@@ -241,6 +244,7 @@ static char kBTImageRequestFlagObjectKey = 3;
 - (void)requestStarted:(BTURLRequestOperation *)operation {
     
 }
+
 - (void)requestFinished:(BTURLRequestOperation *)operation {
     BTURLImageResponse *response = operation.urlResponse;
     UIImage *image = response.image;
@@ -269,6 +273,7 @@ static char kBTImageRequestFlagObjectKey = 3;
     //    self.image = [UIImage imageWithCGImage:[image CGImage] scale:[[UIScreen mainScreen] scale] orientation:image.imageOrientation];
     self.isLoaded = YES;
 }
+
 - (void)requestFailed:(BTURLRequestOperation *)operation {
     
 }

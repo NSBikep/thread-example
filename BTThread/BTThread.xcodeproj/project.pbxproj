@@ -39,6 +39,7 @@
 		4E8707B1173AA1730061E6F7 /* global0.json in Resources */ = {isa = PBXBuildFile; fileRef = 4E8707AD173AA1730061E6F7 /* global0.json */; };
 		4EFA75DF172FFD5E002FC5F1 /* BTConcurrentOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E4744631711C6B4000AF9AD /* BTConcurrentOperation.m */; };
 		4EFA75E2172FFF63002FC5F1 /* BTOperationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EFA75E1172FFF63002FC5F1 /* BTOperationViewController.m */; };
+		DB076BE317743244009C4C36 /* BTImageManger.m in Sources */ = {isa = PBXBuildFile; fileRef = DB076BE217743244009C4C36 /* BTImageManger.m */; };
 		DB2E57DE175F12C800063A0A /* SDWebImageDecoder.m in Sources */ = {isa = PBXBuildFile; fileRef = DB2E57D6175F128400063A0A /* SDWebImageDecoder.m */; };
 		DB2E57E1175F13C900063A0A /* BTURLImageResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = DB2E57E0175F13C900063A0A /* BTURLImageResponse.m */; };
 /* End PBXBuildFile section */
@@ -95,6 +96,8 @@
 		4E8707AD173AA1730061E6F7 /* global0.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = global0.json; sourceTree = "<group>"; };
 		4EFA75E0172FFF63002FC5F1 /* BTOperationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTOperationViewController.h; sourceTree = "<group>"; };
 		4EFA75E1172FFF63002FC5F1 /* BTOperationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTOperationViewController.m; sourceTree = "<group>"; };
+		DB076BE117743244009C4C36 /* BTImageManger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTImageManger.h; sourceTree = "<group>"; };
+		DB076BE217743244009C4C36 /* BTImageManger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BTImageManger.m; sourceTree = "<group>"; };
 		DB2E57D5175F128400063A0A /* SDWebImageDecoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SDWebImageDecoder.h; path = ../SDWebImageDecoder.h; sourceTree = "<group>"; };
 		DB2E57D6175F128400063A0A /* SDWebImageDecoder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SDWebImageDecoder.m; path = ../SDWebImageDecoder.m; sourceTree = "<group>"; };
 		DB2E57DF175F13C800063A0A /* BTURLImageResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BTURLImageResponse.h; sourceTree = "<group>"; };
@@ -230,6 +233,8 @@
 				DB2E57DF175F13C800063A0A /* BTURLImageResponse.h */,
 				DB2E57E0175F13C900063A0A /* BTURLImageResponse.m */,
 				DB2E57E2175F13E400063A0A /* BTURLResponse.h */,
+				DB076BE117743244009C4C36 /* BTImageManger.h */,
+				DB076BE217743244009C4C36 /* BTImageManger.m */,
 			);
 			name = Operation;
 			sourceTree = "<group>";
@@ -335,6 +340,7 @@
 				3FE2AB6117464624004B669C /* NSStringAdditions.m in Sources */,
 				3FE2AB64174647D8004B669C /* NSDataAdditions.m in Sources */,
 				DB2E57E1175F13C900063A0A /* BTURLImageResponse.m in Sources */,
+				DB076BE317743244009C4C36 /* BTImageManger.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

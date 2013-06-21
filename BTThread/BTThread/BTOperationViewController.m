@@ -10,6 +10,8 @@
 #import "BTConcurrentOperation.h"
 #import "UIImageView+Network.h"
 #import "BTCache.h"
+#import "UIViewController+UIImageView.h"
+
 @interface BTOperationViewController ()
 
 @end
@@ -50,6 +52,11 @@
     // Uncomment the following line to preserve selection between presentations.
     self.clearsSelectionOnViewWillAppear = YES;
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(clearAndRest)] autorelease];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    NSLog(@"BTOperationViewController viewwillAppear");
 }
 
 - (void)clearAndRest {

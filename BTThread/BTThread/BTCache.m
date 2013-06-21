@@ -154,7 +154,7 @@ inline static NSString *keyForURL(NSURL *url) {
     if ([op isKindOfClass:[BTIOBlockOperation class]]) {
       if ([((BTIOBlockOperation*)op).key isEqualToString:key]) {
         [op cancel];
-        NSLog(@"--------------");
+        //NSLog(@"--------------");
         break;
         
       }

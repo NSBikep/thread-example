@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "BTURLRequestOperation.h"
 #import "BTURLImageResponse.h"
+#import "BTImageManger.h"
 
 /**
  TODO: [[UIScreen mainScreen] scale]
