@@ -50,7 +50,7 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    NSLog(@"BTRootViewController viewwillAppear");
+    //NSLog(@"BTRootViewController viewwillAppear");
 }
 
 - (void)didReceiveMemoryWarning

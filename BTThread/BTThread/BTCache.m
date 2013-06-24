@@ -23,7 +23,12 @@ inline static NSString *keyForURL(NSURL *url) {
 
 @implementation BTIOBlockOperation
 
-
+- (void)cancel{
+    if([self.key isEqual:[@"https://d2rfichhc2fb9n.cloudfront.net/image/4/RFiYCGPi-cvRoOVXboh18v-TLS4W6qfhDF6yh5NJbNcX9oExjqPjjKe6YTJUuVBbsQf17DejEOLLH--BiN753co1bQbaLl3EjO4tyeQQB9xBpVhJpC3MDYBf4tgv4CrAzWhE2iezRldWTKHSs7XSjQIB4_o" sha1Hash]]){
+        NSLog(@"cancel");
+    }
+    [super cancel];
+}
 
 @end
 
@@ -56,7 +61,7 @@ inline static NSString *keyForURL(NSURL *url) {
     _defaultManager = [[NSFileManager defaultManager] retain];
     NSString* sysCachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
     _cachesDirectory = [[[sysCachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"BTCache"] copy];
-    NSLog(@"_cachesDirectory:%@",_cachesDirectory);
+    //NSLog(@"_cachesDirectory:%@",_cachesDirectory);
     [_defaultManager createDirectoryAtPath:_cachesDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
   }
   return self;
@@ -78,7 +83,7 @@ inline static NSString *keyForURL(NSURL *url) {
     NSOperationQueue *mainQueue = [NSOperationQueue mainQueue];
     BTIOBlockOperation *readExistInDisk = [BTIOBlockOperation blockOperationWithBlock:^{
       NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-      //NSLog(@"readExistInDisk.key = %@", key);
+      ////NSLog(@"readExistInDisk.key = %@", key);
       img = [[_memoryCache objectForKey:key] retain];
       if (!img) {
         BOOL exist = [_defaultManager fileExistsAtPath:[self filePathForKey:key]];
@@ -154,7 +159,7 @@ inline static NSString *keyForURL(NSURL *url) {
     if ([op isKindOfClass:[BTIOBlockOperation class]]) {
       if ([((BTIOBlockOperation*)op).key isEqualToString:key]) {
         [op cancel];
-        //NSLog(@"--------------");
+        ////NSLog(@"--------------");
         break;
         
       }

@@ -17,7 +17,7 @@
 @implementation UIViewController (UIImageView)
 
 + (void)initialize {
-    NSLog(@"self = %@",NSStringFromClass([self class]));
+    //NSLog(@"self = %@",NSStringFromClass([self class]));
     //这个地方的实现还有待考虑。
     Class klass = [UIViewController class];
     method_exchangeImplementations(class_getInstanceMethod(klass,@selector(viewWillAppear:)),class_getInstanceMethod(klass, @selector(__replacedViewWillAppear:)));
@@ -25,12 +25,12 @@
 }
 
 - (void)__replacedViewWillAppear:(BOOL)animated {
-    NSLog(@"replaced %@ ",NSStringFromClass([self class]));
+    //NSLog(@"replaced %@ ",NSStringFromClass([self class]));
     [self reloadImageRequestIfNeed];
 }
 
 - (void)__replacedViewWillDisappear:(BOOL)animated {
-    NSLog(@"replaced %s ",__FUNCTION__);
+    //NSLog(@"replaced %s ",__FUNCTION__);
     [self cancelImageRequestIfNeed];
 }
 

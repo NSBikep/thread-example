@@ -116,9 +116,9 @@
           dispatch_async(dispatch_get_main_queue(), ^{
             [_delegate willStartTask:task];
           });
-          NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
+          //NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
           [task run];
-          NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
+          //NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
           dispatch_async(dispatch_get_main_queue(), ^{
             [task retain];
             [_delegate didFinishTask:task];
@@ -131,19 +131,19 @@
           });
         }
       } else {
-        //NSLog(@"%@ sleepForTimeInterval", [[NSThread currentThread] name]);
+        ////NSLog(@"%@ sleepForTimeInterval", [[NSThread currentThread] name]);
         [NSThread sleepForTimeInterval:0.2];
       }
 
     }
     @catch (NSException *exception) {
-      NSLog(@"exception:%@", exception);
+      //NSLog(@"exception:%@", exception);
     }
     @finally {
       [pool release];
     }
   }
-  NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
+  //NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
 }
 
 @end

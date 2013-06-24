@@ -26,6 +26,7 @@
  */
 
 @interface UIImageView (Network)
+//- (void)setDefaultImage:(UIImage *)image;
 - (void)setImageWithURL:(NSURL *)url;
 - (void)cancelImageRequestOperation;
 - (void)reloadImageRequestIfNeed;

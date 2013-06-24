@@ -56,14 +56,14 @@
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-    NSLog(@"BTOperationViewController viewwillAppear");
+    //NSLog(@"BTOperationViewController viewwillAppear");
 }
 
 - (void)clearAndRest {
     [[BTCache sharedCache] clearAll];
     for (NSDictionary *userDict in _users) {
         NSURL *url = [NSURL URLWithString:[userDict valueForKeyPath:@"cover_image.url"]];
-        NSLog(@"url:%@",url);
+        //NSLog(@"url:%@",url);
         [[BTCache sharedCache] imageForURL:url completionBlock:NULL];
     }
 }

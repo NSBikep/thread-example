@@ -70,7 +70,7 @@
           task = [[_taskQueue objectAtIndex:0] retain];
           [_taskQueue removeObjectAtIndex:0];
         } else {
-          //NSLog(@"%@ process: wait", [[NSThread currentThread] name]);
+          ////NSLog(@"%@ process: wait", [[NSThread currentThread] name]);
           [_condition wait];
         }
       [_condition unlock];
@@ -79,9 +79,9 @@
           dispatch_async(dispatch_get_main_queue(), ^{
             [_delegate willStartTask:task];
           });
-          //NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
+          ////NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
           [task run];
-          //NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
+          ////NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
           dispatch_async(dispatch_get_main_queue(), ^{
             [task retain];
             [_delegate didFinishTask:task];
@@ -96,12 +96,12 @@
       }
     }
     @catch (NSException *exception) {
-      NSLog(@"exception:%@", exception);
+      //NSLog(@"exception:%@", exception);
     }
     @finally {
       [pool release];
     }
   }
-  NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
+  //NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
 }
 @end

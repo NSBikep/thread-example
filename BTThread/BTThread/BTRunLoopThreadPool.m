@@ -23,13 +23,13 @@ void BTRunLoopSourcePerformRoutine (void *info) {
   [obj runLoopPerform];
   __block NSString *threadName = [[NSThread currentThread] name];
   dispatch_async(dispatch_get_global_queue(0, 0), ^{
-    NSLog(@"%@-%s",threadName,__FUNCTION__);
+    //NSLog(@"%@-%s",threadName,__FUNCTION__);
   });
   
 }
 
 void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info) {
-  //NSLog(@"%@: BTRunLoopObserverCallBack CFRunLoopActivity:%lu",[[NSThread currentThread] name], activity);
+  ////NSLog(@"%@: BTRunLoopObserverCallBack CFRunLoopActivity:%lu",[[NSThread currentThread] name], activity);
   BTRunLoopThreadPool* obj = (BTRunLoopThreadPool*)info;
   [obj runLoopObserverCallback:activity];
 }
@@ -71,7 +71,7 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
 }
 
 - (void)notifyThreads {
-  //NSLog(@"%s %@ >>>>>>>>>>>>>>",__FUNCTION__,[[NSThread currentThread] name]);
+  ////NSLog(@"%s %@ >>>>>>>>>>>>>>",__FUNCTION__,[[NSThread currentThread] name]);
   
 //  while (YES) {
 //    @synchronized(_taskQueue) {
@@ -88,7 +88,7 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
   
   NSRunLoop *runLoop = nil;
   @synchronized (_idleThreads){
-    //NSLog(@"%s %@ >>>>>>>>>>>>>>[_idleThreads count]:%d",__FUNCTION__,[[NSThread currentThread] name],[_idleThreads count]);
+    ////NSLog(@"%s %@ >>>>>>>>>>>>>>[_idleThreads count]:%d",__FUNCTION__,[[NSThread currentThread] name],[_idleThreads count]);
     if ([_idleThreads count] > 0) {
       runLoop = [_idleThreads anyObject];
       [_idleThreads removeObject:runLoop];
@@ -106,7 +106,7 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
 //      CFRunLoopSourceSignal(_runLoopSource);
 //      CFRunLoopWakeUp([runLoop getCFRunLoop]);
 ////    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-////      NSLog(@"%s",__FUNCTION__);
+////      //NSLog(@"%s",__FUNCTION__);
 ////    });
 //    }
 //  }
@@ -126,23 +126,23 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
 }
 
 - (void) wakeUpThread {
-  //NSLog(@"%s %@ start",__FUNCTION__,[[NSThread currentThread] name]);
+  ////NSLog(@"%s %@ start",__FUNCTION__,[[NSThread currentThread] name]);
 //  if (CFRunLoopIsWaiting(CFRunLoopGetCurrent())) {
 //    CFRunLoopWakeUp(CFRunLoopGetCurrent());
 //  }
  // NSThread *th = [NSThread currentThread];
 //  BOOL isExecuting = [th isExecuting];
-  //NSLog(@"th:%@ isExecuting = %d", [th name],isExecuting);
+  ////NSLog(@"th:%@ isExecuting = %d", [th name],isExecuting);
   //if (!isExecuting) {
 //    CFRunLoopWakeUp(CFRunLoopGetCurrent());
   //}
   
-  //NSLog(@"%s %@ -------------",__FUNCTION__,[[NSThread currentThread] name]);
+  ////NSLog(@"%s %@ -------------",__FUNCTION__,[[NSThread currentThread] name]);
 
 }
 
 - (void)main {
-  //NSLog(@"%s %@ -------------",__FUNCTION__,[[NSThread currentThread] name]);
+  ////NSLog(@"%s %@ -------------",__FUNCTION__,[[NSThread currentThread] name]);
   NSThread *curThread = [NSThread currentThread];
   NSRunLoop *currentRunLoop = [NSRunLoop currentRunLoop];
 
@@ -161,12 +161,12 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
   while (![curThread isCancelled]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     @try {
-      NSLog(@"CFRunLoopRun");
+      //NSLog(@"CFRunLoopRun");
       //CFRunLoopRun();
       [currentRunLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
     }
     @catch (NSException *exception) {
-      NSLog(@"exception:%@", exception);
+      //NSLog(@"exception:%@", exception);
     }
     @finally {
       [pool release];
@@ -175,11 +175,11 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
   CFRunLoopRemoveSource(CFRunLoopGetCurrent(), _runLoopSource, kCFRunLoopDefaultMode);
   CFRelease(_runLoopSource);
   _runLoopSource = NULL;
-  NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
+  //NSLog(@"%@ Exit!------",[[NSThread currentThread] name]);
 }
 
 - (void)runLoopPerform {
-  //NSLog(@"%@ runLoopPerform", [[NSThread currentThread] name]);
+  ////NSLog(@"%@ runLoopPerform", [[NSThread currentThread] name]);
   
   id<BTTask> task = nil;
   @synchronized(_taskQueue) {
@@ -193,9 +193,9 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
       dispatch_async(dispatch_get_main_queue(), ^{
         [_delegate willStartTask:task];
       });
-      //NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
+      ////NSLog(@"%@ process: Task[%d] start", [[NSThread currentThread] name],task.taskID);
       [task run];
-      //NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
+      ////NSLog(@"%@ process: Task[%d] end", [[NSThread currentThread] name],task.taskID);
       
       dispatch_async(dispatch_get_main_queue(), ^{
         [task retain];
@@ -228,6 +228,6 @@ void BTRunLoopObserverCallBack(CFRunLoopObserverRef observer, CFRunLoopActivity 
       }
     }
   }
-  //NSLog(@"%@,activity:%lu _idleThreads count:%d",[[NSThread currentThread] name],activity,[_idleThreads count]);
+  ////NSLog(@"%@,activity:%lu _idleThreads count:%d",[[NSThread currentThread] name],activity,[_idleThreads count]);
 }
 @end

@@ -109,7 +109,7 @@
  Subclass should overwrite this method
  */
 - (void)concurrentExecution {
-    NSLog(@"发请求");
+    //NSLog(@"发请求");
     dispatch_async(dispatch_get_main_queue(), ^{
 //        if (_delegate && [_delegate respondsToSelector:@selector(requestStarted:)]) {
 //            [_delegate performSelector:@selector(requestStarted:) withObject:self];
@@ -131,7 +131,7 @@
     
     
     [self.connection start];
-    //NSLog(@"%@ self.connection start",self);
+    ////NSLog(@"%@ self.connection start",self);
     
 }
 
@@ -165,7 +165,7 @@
  */
 - (void)connection:(NSURLConnection __unused *)connection didReceiveResponse:(NSURLResponse *)response {
     //long long contentLength = [response expectedContentLength];
-    //NSLog(@"didReceiveResponse >> th:%@-op:%@ contentLength:%f",[NSThread currentThread],self.name,(contentLength/1024/1024.0));
+    ////NSLog(@"didReceiveResponse >> th:%@-op:%@ contentLength:%f",[NSThread currentThread],self.name,(contentLength/1024/1024.0));
     self.response = response;
     self.outputStream = [NSOutputStream outputStreamToMemory];
     [self.outputStream open];
@@ -212,7 +212,7 @@
             [self.outputStream write:&dataBuffer[0] maxLength:[data length]];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                //NSLog(@"didReceiveData[%@]:%d",self.name, [data length]);
+                ////NSLog(@"didReceiveData[%@]:%d",self.name, [data length]);
                 //TODO:
                 //    self.totalBytesRead += [data length];
                 //

@@ -10,6 +10,12 @@
 
 @interface BTImageManger : NSObject
 
-+ (id)imageForURL:(NSURL *)url completeBlock:(void (^)(UIImage *image, NSURL *url))complete;
+
+
+@property (nonatomic,assign)BOOL  isloading;
+@property (nonatomic,assign)BOOL  isAutoCancelRequest;
+- (void)imageForURL:(NSURL *)url completeBlock:(void (^)(UIImage *image, NSURL *url))complete;
+
+- (void)cancelRequest;
 
 @end

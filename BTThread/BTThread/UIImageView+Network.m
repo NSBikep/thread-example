@@ -19,8 +19,10 @@ typedef NS_OPTIONS(NSUInteger, UIImageViewRequestFlag) {
 static char kBTImageRequestOperationObjectKey = 1;
 static char kBTImageRequestURLObjectKey = 2;
 static char kBTImageRequestFlagObjectKey = 3;
+static char kBTImageManagerObjectKey = 4;
 
 @interface UIImageView (_Network)
+@property (nonatomic, retain) BTImageManger *imageManager;
 @property (nonatomic, retain) BTURLRequestOperation *imageRequestOperation;
 @property (nonatomic, retain) NSURL *requestURL;
 @property (nonatomic, retain) NSNumber *requestFlags;
@@ -36,6 +38,9 @@ static char kBTImageRequestFlagObjectKey = 3;
 @dynamic requestURL;
 @dynamic requestFlags;
 @dynamic isLoaded;
+
+//add Neo
+@dynamic imageManager;
 @end
 
 @implementation UIImageView (Network)
@@ -48,7 +53,7 @@ static char kBTImageRequestFlagObjectKey = 3;
 //}
 
 - (void)__drawRect:(CGRect)rect {
-    NSLog(@"__drawRect");
+    //NSLog(@"__drawRect");
 }
 
 - (void)dealloc {
@@ -58,6 +63,20 @@ static char kBTImageRequestFlagObjectKey = 3;
     [super dealloc];
 }
 
+#pragma mark ——————————————————————
+#pragma mark set & get Method about imageManager
+
+- (BTImageManger *)imageManager{
+    return (BTImageManger *)objc_getAssociatedObject(self, &kBTImageManagerObjectKey);
+}
+
+- (void)setImageManager:(BTImageManger *)imageManager{
+    objc_setAssociatedObject(self, &kBTImageManagerObjectKey, imageManager, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+
+#pragma mark ——————————————————————
+#pragma mark runTime Method
 - (BTURLRequestOperation *)imageRequestOperation {
     return (BTURLRequestOperation *)objc_getAssociatedObject(self, &kBTImageRequestOperationObjectKey);
 }
@@ -122,6 +141,14 @@ static char kBTImageRequestFlagObjectKey = 3;
     [self setBoolValue:value forFlag:UIImageViewRequestFlagIsLoaded];
 }
 
+
+
+
+
+
+#pragma mark ——————————————————————————
+#pragma mark cache
+
 + (NSOperationQueue *)sharedImageRequestOperationQueue {
     static NSOperationQueue *__imageRequestOperationQueue = nil;
     static dispatch_once_t __onceToken;
@@ -144,6 +171,7 @@ static char kBTImageRequestFlagObjectKey = 3;
 }
 
 - (void)setImageWithURL:(NSURL *)url {
+    
     if (![self.requestURL isEqual:url]) {
 //        [[BTCache sharedCache] cancelImageForURL:self.requestURL];
 //        [self cancelImageRequestOperation];
@@ -160,9 +188,28 @@ static char kBTImageRequestFlagObjectKey = 3;
 //                }
 //            }
 //        }];
-        BTImageManger *manger =[BTImageManger imageForURL:self.requestURL completeBlock:^(UIImage *image,NSURL *url){
-            if([self.requestURL isEqual:url]){
+        
+        self.image = nil;
+        self.requestURL = url;
+        
+        
+        BTImageManger *manager = self.imageManager;
+        if(!manager){
+            manager = [[BTImageManger alloc] init];
+            manager.isAutoCancelRequest = self.isAutoCancelRequest;
+            self.imageManager = manager;
+            [manager release];
+        }
+        [manager imageForURL:url completeBlock:^(UIImage *image,NSURL *aUrl){
+            if([url isEqual:aUrl]){
                 self.image = image;
+                self.alpha = 0.3;
+                [UIView beginAnimations:@"" context:NULL];
+                [UIView setAnimationDuration:0.3];
+                self.alpha = 1.0;
+                
+                [UIView commitAnimations];
+                self.isLoaded = YES;
             }
         }];
     }
@@ -195,14 +242,14 @@ static char kBTImageRequestFlagObjectKey = 3;
     };
     
     BTURLRequestOperationStartBlock startBlock = ^(BTURLRequestOperation *op){
-        NSLog(@"开始请求 op =  %@",op);
+        //NSLog(@"开始请求 op =  %@",op);
     };
     
     
     BTURLRequestOperation *operation = [[BTURLRequestOperation alloc] initWithURL:url start:startBlock cancel:nil complete:completeBlock failed:nil];
     operation.urlResponse = [[[BTURLImageResponse alloc] init] autorelease];
     if ([url isFileURL]) { //优先加载本地文件
-        //NSLog(@"isFileURL = YES fileReferenceURL=%@ filePathURL=%@", [url fileReferenceURL],[url filePathURL]);
+        ////NSLog(@"isFileURL = YES fileReferenceURL=%@ filePathURL=%@", [url fileReferenceURL],[url filePathURL]);
         //TODO: if it's a local file, send to an other queue? we need to load it first.
         //Step1: 检查本地有没有
         //Step2: 有，直接异步加载
