@@ -1,4 +1,4 @@
-3//
+//
 //  BTImageManger.m
 //  BTThread
 //
