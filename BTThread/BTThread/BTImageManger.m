@@ -1,4 +1,4 @@
-//
+3//
 //  BTImageManger.m
 //  BTThread
 //
@@ -12,10 +12,12 @@
 #import <objc/runtime.h>
 
 static char kBTImageRequestOperationObjectKey = 1;
+static char kBTImageMemoryAndLocalOperationObjectKey = 2;
 
 @interface BTImageManger (runTime)
 
 @property (nonatomic, retain) BTURLRequestOperation *imageRequestOperation;
+@property (nonatomic, retain) NSBlockOperation  *imageCacheOperation;
 
 @end
 
@@ -29,6 +31,14 @@ static char kBTImageRequestOperationObjectKey = 1;
 
 - (void)setImageRequestOperation:(BTURLRequestOperation *)imageRequestOperation {
     objc_setAssociatedObject(self, &kBTImageRequestOperationObjectKey, imageRequestOperation,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSBlockOperation *)imageCacheOperation{
+    return (NSBlockOperation *)objc_getAssociatedObject(self, &kBTImageMemoryAndLocalOperationObjectKey);
+}
+
+- (void)setImageCacheOperation:(NSBlockOperation *)imageCacheOperation{
+    objc_setAssociatedObject(self, &kBTImageMemoryAndLocalOperationObjectKey, imageCacheOperation,OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end
@@ -79,15 +89,10 @@ static char kBTImageRequestOperationObjectKey = 1;
     }else{
         [self cancelRequest];
         self.requestURL = url;
-        if([url isEqual:[NSURL URLWithString:@"https://d2rfichhc2fb9n.cloudfront.net/image/4/RFiYCGPi-cvRoOVXboh18v-TLS4W6qfhDF6yh5NJbNcX9oExjqPjjKe6YTJUuVBbsQf17DejEOLLH--BiN753co1bQbaLl3EjO4tyeQQB9xBpVhJpC3MDYBf4tgv4CrAzWhE2iezRldWTKHSs7XSjQIB4_o"]]){
-            NSLog(@"发出请求");
-        }
-        [[BTCache sharedCache] imageForURL:url completionBlock:^(UIImage *image, NSURL *url) {
+        NSBlockOperation * op = [[BTCache sharedCache] imageForURL:url object:self completionBlock:^(UIImage *image, NSURL *url) {
+            self.imageCacheOperation = nil;
             if ([self.requestURL isEqual:url]) {
                 if (image&&complete) {
-                    if([url isEqual:[NSURL URLWithString:@"https://d2rfichhc2fb9n.cloudfront.net/image/4/RFiYCGPi-cvRoOVXboh18v-TLS4W6qfhDF6yh5NJbNcX9oExjqPjjKe6YTJUuVBbsQf17DejEOLLH--BiN753co1bQbaLl3EjO4tyeQQB9xBpVhJpC3MDYBf4tgv4CrAzWhE2iezRldWTKHSs7XSjQIB4_o"]]){
-                        NSLog(@"完成");
-                    }
                     complete(image,self.requestURL);
                 } else {
                     //TODO: request
@@ -95,14 +100,19 @@ static char kBTImageRequestOperationObjectKey = 1;
                 }
             }
         }];
+        self.imageCacheOperation = op;
     }
 }
 
 //cancel request
 - (void)cancelRequest{
     //去掉从本地读取的request
-    [[BTCache sharedCache] cancelImageForURL:self.requestURL];
-    
+    //[[BTCache sharedCache] cancelImageForURL:self.requestURL withObject:self];
+    if(self.imageCacheOperation){
+        NSLog(@"存在");
+    }
+    [self.imageCacheOperation cancel];
+    self.imageCacheOperation = nil;
     //去掉从网络读取的request
     if(self.isAutoCancelRequest){
         BTURLRequestOperation *op = self.imageRequestOperation;

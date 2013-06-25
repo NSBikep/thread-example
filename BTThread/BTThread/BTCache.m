@@ -17,20 +17,14 @@ inline static NSString *keyForURL(NSURL *url) {
 	return [url absoluteString];
 }
 
-@interface BTIOBlockOperation : NSBlockOperation
-@property(nonatomic,copy) NSString* key;
-@end
-
-@implementation BTIOBlockOperation
-
-- (void)cancel{
-    if([self.key isEqual:[@"https://d2rfichhc2fb9n.cloudfront.net/image/4/RFiYCGPi-cvRoOVXboh18v-TLS4W6qfhDF6yh5NJbNcX9oExjqPjjKe6YTJUuVBbsQf17DejEOLLH--BiN753co1bQbaLl3EjO4tyeQQB9xBpVhJpC3MDYBf4tgv4CrAzWhE2iezRldWTKHSs7XSjQIB4_o" sha1Hash]]){
-        NSLog(@"cancel");
-    }
-    [super cancel];
-}
-
-@end
+//@interface BTIOBlockOperation : NSBlockOperation
+//@property(nonatomic,copy) NSString* key;
+//@property(nonatomic,assign) id obj;
+//@end
+//
+//@implementation BTIOBlockOperation
+//
+//@end
 
 
 @implementation BTCache
@@ -50,7 +44,7 @@ inline static NSString *keyForURL(NSURL *url) {
   if (self) {
     _memoryCache = [[NSCache alloc] init];
     [_memoryCache setName:@"BTCache-Memory"];
-    [_memoryCache setCountLimit:1];
+    [_memoryCache setCountLimit:100];
     
     _diskOperationQueue = [[NSOperationQueue alloc] init];
     [_diskOperationQueue setMaxConcurrentOperationCount:1];
@@ -71,7 +65,7 @@ inline static NSString *keyForURL(NSURL *url) {
   return cachePathForKey(_cachesDirectory, key);
 }
 
-- (void) imageForURL:(NSURL*)url completionBlock:(void (^)(UIImage *image, NSURL *url))completion {
+- (NSBlockOperation *) imageForURL:(NSURL*)url completionBlock:(void (^)(UIImage *image, NSURL *url))completion {
   NSString* key = [[url absoluteString] sha1Hash];
   __block UIImage *img = [[_memoryCache objectForKey:key] retain];
   if (img) {
@@ -81,7 +75,7 @@ inline static NSString *keyForURL(NSURL *url) {
     }
   } else {
     NSOperationQueue *mainQueue = [NSOperationQueue mainQueue];
-    BTIOBlockOperation *readExistInDisk = [BTIOBlockOperation blockOperationWithBlock:^{
+    NSBlockOperation *readExistInDisk = [NSBlockOperation blockOperationWithBlock:^{
       NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
       ////NSLog(@"readExistInDisk.key = %@", key);
       img = [[_memoryCache objectForKey:key] retain];
@@ -126,12 +120,13 @@ inline static NSString *keyForURL(NSURL *url) {
       [pool release];
     }];
     [readExistInDisk setQueuePriority:NSOperationQueuePriorityNormal];
-    readExistInDisk.key = key;
+//    readExistInDisk.key = key;
+//      readExistInDisk.obj = obj;
     [_diskOperationQueue addOperation:readExistInDisk];
+    return readExistInDisk;
   }
-
+    return nil;
 }
-
 
 - (void)setImage:(UIImage*)image forURL:(NSURL*)url {
    NSString* key = [[url absoluteString] sha1Hash];
@@ -150,22 +145,6 @@ inline static NSString *keyForURL(NSURL *url) {
   }];
   [writeToDisk setQueuePriority:NSOperationQueuePriorityLow];
   [_diskOperationQueue addOperation:writeToDisk];
-}
-
-- (void)cancelImageForURL:(NSURL*)url {
-  NSString* key = [[url absoluteString] sha1Hash];
-  NSArray *ops = [[_diskOperationQueue operations] copy];
-  for (NSBlockOperation *op in ops) {
-    if ([op isKindOfClass:[BTIOBlockOperation class]]) {
-      if ([((BTIOBlockOperation*)op).key isEqualToString:key]) {
-        [op cancel];
-        ////NSLog(@"--------------");
-        break;
-        
-      }
-    }
-  }
-  [ops release];
 }
 
 - (void)clearAll {
